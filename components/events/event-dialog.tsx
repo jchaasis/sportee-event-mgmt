@@ -234,48 +234,55 @@ export function EventDialog({ event, open, onOpenChange, onEventSaved }: EventDi
               )}
             />
 
-            <div className="space-y-4">
-              <FormLabel>Venues</FormLabel>
-              <div className="flex gap-2">
-                <Input
-                  id="venue-input"
-                  placeholder="Enter venue name"
-                  className="bg-[#f3f3f5] border-0"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addVenue()
-                    }
-                  }}
-                />
-                <Button type="button" onClick={addVenue} variant="outline" className="bg-[#eceef2] border-0">
-                  <Plus className="size-4" />
-                  Add
-                </Button>
-              </div>
-              <FormDescription>Add one or more venues for this event</FormDescription>
+            <FormField
+              control={form.control}
+              name="venueIds"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Venues</FormLabel>
+                  <div className="flex gap-2">
+                    <Input
+                      id="venue-input"
+                      placeholder="Enter venue name"
+                      className="bg-[#f3f3f5] border-0"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          addVenue()
+                        }
+                      }}
+                    />
+                    <Button type="button" onClick={addVenue} variant="outline" className="bg-[#eceef2] border-0">
+                      <Plus className="size-4" />
+                      Add
+                    </Button>
+                  </div>
+                  <FormDescription>Add one or more venues for this event</FormDescription>
 
-              {/* Venue chips */}
-              {venues.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {venues.map((venue, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 rounded-lg bg-[#eceef2] px-4 py-2"
-                    >
-                      <span className="text-sm font-medium text-[#030213]">{venue}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeVenue(index)}
-                        className="hover:bg-gray-200 rounded p-1"
-                      >
-                        <X className="size-3" />
-                      </button>
+                  {/* Venue chips */}
+                  {venues.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {venues.map((venue, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 rounded-lg bg-[#eceef2] px-4 py-2"
+                        >
+                          <span className="text-sm font-medium text-[#030213]">{venue}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeVenue(index)}
+                            className="hover:bg-gray-200 rounded p-1"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  )}
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
 
             <DialogFooter>
               <Button
