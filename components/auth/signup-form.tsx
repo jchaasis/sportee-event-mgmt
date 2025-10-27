@@ -9,7 +9,14 @@ import { signupSchema, type SignupFormData } from '@/lib/validations'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -17,12 +24,13 @@ export function SignupForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignupFormData>({
+  const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
   })
 
   const onSubmit = async (data: SignupFormData) => {
@@ -93,65 +101,82 @@ export function SignupForm() {
       </div>
 
       <div className="px-6 pb-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Your name"
-              {...register('name')}
-              className="bg-[#f3f3f5] border-0 h-9"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Your name"
+                      {...field}
+                      className="bg-[#f3f3f5] border-0 h-9"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && (
-              <p className="text-sm text-red-600">{errors.name.message}</p>
-            )}
-          </div>
 
-          {/* Email */}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              {...register('email')}
-              className="bg-[#f3f3f5] border-0 h-9"
+            {/* Email */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      {...field}
+                      className="bg-[#f3f3f5] border-0 h-9"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.email && (
-              <p className="text-sm text-red-600">{errors.email.message}</p>
-            )}
-          </div>
 
-          {/* Password */}
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register('password')}
-              className="bg-[#f3f3f5] border-0 h-9"
+            {/* Password */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      {...field}
+                      className="bg-[#f3f3f5] border-0 h-9"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.password && (
-              <p className="text-sm text-red-600">{errors.password.message}</p>
-            )}
-          </div>
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-purple-800 hover:bg-purple-900 h-9"
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              'Create account'
-            )}
-          </Button>
-        </form>
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-purple-800 hover:bg-purple-900 h-9"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                'Create account'
+              )}
+            </Button>
+          </form>
+        </Form>
 
         {/* Divider */}
         <div className="relative my-4">
