@@ -135,6 +135,7 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
         sportType={localSportType}
         onSearchChange={handleSearchChange}
         onSportTypeChange={handleSportTypeChange}
+        isLoading={isPending}
       />
 
       {/* Events List or Empty State */}
