@@ -23,14 +23,10 @@ export type SportType = (typeof SPORT_TYPES)[number]
  */
 export const eventSchema = z.object({
   name: z.string().min(1, 'Event name is required').max(100, 'Event name must be 100 characters or less'),
-  sportType: z.enum(SPORT_TYPES as [string, ...string[]], {
-    errorMap: () => ({ message: 'Invalid sport type' }),
-  }),
-  eventDate: z.date({
-    required_error: 'Event date and time is required',
-  }),
+  sportType: z.enum(SPORT_TYPES as unknown as [string, ...string[]], 'Invalid sport type'),
+  eventDate: z.coerce.date('Event date and time is required'),
   description: z.string().max(1000, 'Description must be 1000 characters or less').optional(),
-  venueIds: z.array(z.string().uuid()).min(1, 'At least one venue is required'),
+  venueIds: z.array(z.string()).min(1, 'At least one venue is required'),
 })
 
 export type EventFormData = z.infer<typeof eventSchema>

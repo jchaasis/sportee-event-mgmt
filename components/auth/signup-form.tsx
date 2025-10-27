@@ -52,9 +52,9 @@ export function SignupForm() {
     
     const result = await signInWithGoogle()
     
-    if (result.success && result.data?.url) {
-      window.location.href = result.data.url
-    } else {
+    if (result.success && result.data && typeof result.data === 'object' && 'url' in result.data) {
+      window.location.href = result.data.url as string
+    } else if (!result.success) {
       toast.error(result.error || 'Failed to sign in with Google')
       setIsLoading(false)
     }
