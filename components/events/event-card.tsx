@@ -61,9 +61,8 @@ export function EventCard({ event, onEdit, onDelete }: EventCardProps) {
         </div>
 
         {/* Description */}
-        {event.description && (
-          <p className="text-base text-[#717182] line-clamp-2">{event.description}</p>
-        )}
+        <p className="text-base text-[#717182] line-clamp-2">{event.description || 'No description available'}</p>
+
 
         {/* Venues */}
         {event.venues && event.venues.length > 0 && (

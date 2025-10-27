@@ -119,6 +119,19 @@ export function EventDialog({ event, open, onOpenChange, onEventSaved }: EventDi
       if (result.success) {
         toast.success(event ? 'Event updated successfully' : 'Event created successfully')
         onEventSaved?.()
+        
+        // Reset form if creating a new event
+        if (!event) {
+          form.reset({
+            name: '',
+            sportType: 'soccer',
+            eventDate: new Date(),
+            description: '',
+            venueIds: [],
+          })
+          setVenues([])
+        }
+        
         onOpenChange(false)
       } else {
         toast.error(result.error)

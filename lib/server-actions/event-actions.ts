@@ -281,7 +281,7 @@ export async function updateEvent(eventId: string, formData: FormData): Promise<
 
     // Create or link new venues
     for (const venueName of validated.venueIds) {
-      let { data: existingVenue } = await adminSupabase
+      const { data: existingVenue } = await adminSupabase
         .from('venues')
         .select('id')
         .eq('name', venueName)

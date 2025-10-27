@@ -8,6 +8,14 @@ import { EmptyState } from '@/components/events/empty-state'
 import { SearchAndFilter } from '@/components/events/search-and-filter'
 import { EventDialog } from '@/components/events/event-dialog'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 import { deleteEvent as deleteEventAction } from '@/lib/server-actions/event-actions'
 import { toast } from 'sonner'
@@ -23,15 +31,30 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [events, setEvents] = useState(initialEvents)
+  const [localSearch, setLocalSearch] = useState(search)
+  const [localSportType, setLocalSportType] = useState(sportType)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Sync local state with initialEvents when it changes (e.g., after refresh)
   useEffect(() => {
     setEvents(initialEvents)
   }, [initialEvents])
 
+  // Sync local search/sport with props when they change
+  useEffect(() => {
+    setLocalSearch(search)
+  }, [search])
+
+  useEffect(() => {
+    setLocalSportType(sportType)
+  }, [sportType])
+
   const handleSearchChange = (value: string) => {
+    setLocalSearch(value) // Update local state immediately
     const currentParams = new URLSearchParams(Array.from(searchParams.entries()))
     if (value) {
       currentParams.set('search', value)
@@ -44,6 +67,7 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
   }
 
   const handleSportTypeChange = (value: string) => {
+    setLocalSportType(value) // Update local state immediately
     const currentParams = new URLSearchParams(Array.from(searchParams.entries()))
     if (value && value !== 'all') {
       currentParams.set('sport', value)
@@ -65,18 +89,28 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
     setDialogOpen(true)
   }
 
-  const handleDeleteEvent = async (eventId: string) => {
-    if (confirm('Are you sure you want to delete this event?')) {
-      const result = await deleteEventAction(eventId)
-      
-      if (result.success) {
-        toast.success('Event deleted successfully')
-        setEvents(events.filter((e) => e.id !== eventId))
-        router.refresh()
-      } else {
-        toast.error(result.error || 'Failed to delete event')
-      }
+  const handleDeleteEvent = (eventId: string) => {
+    setEventToDelete(eventId)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteEvent = async () => {
+    if (!eventToDelete) return
+
+    setIsDeleting(true)
+    const result = await deleteEventAction(eventToDelete)
+    
+    if (result.success) {
+      toast.success('Event deleted successfully')
+      setEvents(events.filter((e) => e.id !== eventToDelete))
+      router.refresh()
+      setDeleteDialogOpen(false)
+      setEventToDelete(null)
+    } else {
+      toast.error(result.error || 'Failed to delete event')
     }
+    
+    setIsDeleting(false)
   }
 
   const handleEventSaved = () => {
@@ -97,8 +131,8 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
 
       {/* Search and Filter */}
       <SearchAndFilter
-        search={search}
-        sportType={sportType}
+        search={localSearch}
+        sportType={localSportType}
         onSearchChange={handleSearchChange}
         onSportTypeChange={handleSportTypeChange}
       />
@@ -112,6 +146,37 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
 
       {/* Event Dialog */}
       <EventDialog event={selectedEvent} open={dialogOpen} onOpenChange={setDialogOpen} onEventSaved={handleEventSaved} />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Event</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this event? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false)
+                setEventToDelete(null)
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteEvent}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
