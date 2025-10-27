@@ -44,7 +44,7 @@ export function SignupForm() {
     const result = await signUp(formData)
 
     if (result.success) {
-      toast.success('Account created successfully! Check your email for verification.')
+      toast.success('Account created successfully!')
       router.push('/dashboard')
       router.refresh()
     } else {
