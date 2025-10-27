@@ -59,6 +59,15 @@ CREATE TABLE IF NOT EXISTS event_venues (
     UNIQUE(event_id, venue_id)
 );
 
+-- User profiles (extends auth.users)
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================
 -- INDEXES
 -- ============================================
@@ -80,6 +89,7 @@ ALTER TABLE organization_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE venues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_venues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- ORGANIZATIONS POLICIES
@@ -210,6 +220,25 @@ CREATE POLICY "Users can delete event venues"
     );
 
 -- ============================================
+-- PROFILES POLICIES
+-- ============================================
+
+-- Users can view their own profile
+CREATE POLICY "Users can view their own profile"
+    ON profiles FOR SELECT
+    USING (id = auth.uid());
+
+-- Users can update their own profile
+CREATE POLICY "Users can update their own profile"
+    ON profiles FOR UPDATE
+    USING (id = auth.uid());
+
+-- Users can insert their own profile
+CREATE POLICY "Users can insert their own profile"
+    ON profiles FOR INSERT
+    WITH CHECK (id = auth.uid());
+
+-- ============================================
 -- FUNCTIONS
 -- ============================================
 
@@ -237,6 +266,12 @@ CREATE TRIGGER update_venues_updated_at
 -- Trigger to update updated_at on events
 CREATE TRIGGER update_events_updated_at
     BEFORE UPDATE ON events
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger to update updated_at on profiles
+CREATE TRIGGER update_profiles_updated_at
+    BEFORE UPDATE ON profiles
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 

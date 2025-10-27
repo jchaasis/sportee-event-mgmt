@@ -4,7 +4,7 @@ import { createUserClient } from './server-client'
  * Gets the current authenticated user from the session
  */
 export async function getCurrentUser() {
-  const supabase = createUserClient()
+  const supabase = await createUserClient()
   const { data: { user }, error } = await supabase.auth.getUser()
   
   if (error || !user) {
@@ -18,7 +18,7 @@ export async function getCurrentUser() {
  * Gets the current session
  */
 export async function getSession() {
-  const supabase = createUserClient()
+  const supabase = await createUserClient()
   const { data: { session }, error } = await supabase.auth.getSession()
   
   if (error || !session) {
@@ -32,7 +32,7 @@ export async function getSession() {
  * Signs out the current user
  */
 export async function signOut() {
-  const supabase = createUserClient()
+  const supabase = await createUserClient()
   await supabase.auth.signOut()
 }
 

@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
  * Creates a Supabase client for server-side operations
  * This uses the service role key for elevated privileges when needed
  */
-export function createClient() {
+export async function createClient() {
   const cookieStore = await cookies()
 
   return createServerClient(
@@ -36,7 +36,7 @@ export function createClient() {
  * Creates a Supabase client for server-side operations with user context
  * This uses the anon key and respects RLS policies
  */
-export function createUserClient() {
+export async function createUserClient() {
   const cookieStore = await cookies()
 
   return createServerClient(
