@@ -1,15 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-
+  
   if (code) {
-    const cookieStore = await cookies()
-    const cookiesToSet: Array<{ name: string; value: string }> = []
+    // Store cookies that will be set during exchangeCodeForSession
+    const authCookies: Array<{ name: string; value: string; options?: object }> = []
     
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,12 +16,12 @@ export async function GET(request: NextRequest) {
       {
         cookies: {
           getAll() {
-            return cookieStore.getAll()
+            return request.cookies.getAll()
           },
-          setAll(cookiesToStore) {
-            cookiesToStore.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-              cookiesToSet.push({ name, value })
+          setAll(cookiesToSet) {
+            // Capture cookies that Supabase wants to set
+            cookiesToSet.forEach(({ name, value, options }) => {
+              authCookies.push({ name, value, options })
             })
           },
         },
@@ -31,11 +30,12 @@ export async function GET(request: NextRequest) {
 
     // Exchange code for session
     const { error } = await supabase.auth.exchangeCodeForSession(code)
+    
     if (!error) {
       // Get the current user
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (user) {        
+      if (user) {
         // Check if user has an organization
         const { data: memberships } = await supabase
           .from('organization_members')
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
             .select()
             .single()
 
-          if (!orgError && orgData) {            
+          if (!orgError && orgData) {
             // Create organization membership
             const { error: memberError } = await adminSupabase
               .from('organization_members')
@@ -67,8 +67,6 @@ export async function GET(request: NextRequest) {
 
             if (memberError) {
               console.error('Failed to create organization membership:', memberError)
-            } else {
-              console.log('Successfully created organization membership')
             }
 
             // Create user profile
@@ -82,21 +80,25 @@ export async function GET(request: NextRequest) {
 
             if (profileError) {
               console.error('Failed to create profile:', profileError)
-            } else {
-              console.log('Successfully created user profile')
             }
-          } else if (orgError) {
-            console.error('Failed to create organization:', orgError)
           }
         }
       }
 
-      // Redirect to dashboard after successful authentication with cookies in the response
-      const redirectResponse = NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
-      cookiesToSet.forEach(({ name, value }) => {
-        redirectResponse.cookies.set(name, value)
+      // Create redirect response
+      const redirect = NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+      
+      // Set all the auth cookies that Supabase wants to set
+      authCookies.forEach(({ name, value, options }) => {
+        redirect.cookies.set(name, value, options || {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+        })
       })
-      return redirectResponse
+      
+      return redirect
     }
   }
 
