@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Event } from '@/lib/server-actions/event-actions'
 import { EventList } from '@/components/events/event-list'
@@ -25,6 +25,11 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
   const [events, setEvents] = useState(initialEvents)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+
+  // Sync local state with initialEvents when it changes (e.g., after refresh)
+  useEffect(() => {
+    setEvents(initialEvents)
+  }, [initialEvents])
 
   const handleSearchChange = (value: string) => {
     const currentParams = new URLSearchParams(Array.from(searchParams.entries()))
@@ -74,6 +79,11 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
     }
   }
 
+  const handleEventSaved = () => {
+    // Refresh will update the server data, and useEffect will sync the local state
+    router.refresh()
+  }
+
   return (
     <div className="space-y-8">
       {/* Header with Create Event button */}
@@ -101,7 +111,7 @@ export function DashboardContent({ initialEvents, search, sportType }: Dashboard
       )}
 
       {/* Event Dialog */}
-      <EventDialog event={selectedEvent} open={dialogOpen} onOpenChange={setDialogOpen} />
+      <EventDialog event={selectedEvent} open={dialogOpen} onOpenChange={setDialogOpen} onEventSaved={handleEventSaved} />
     </div>
   )
 }

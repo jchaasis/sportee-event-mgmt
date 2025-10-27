@@ -1,14 +1,38 @@
-import { getCurrentUser } from '@/lib/supabase/auth-helpers'
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/server-actions/auth-actions'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { LogOut } from 'lucide-react'
 
-export async function DashboardHeader() {
-  const user = await getCurrentUser()
+export function DashboardHeader() {
+  const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   async function handleSignOut() {
-    'use server'
-    await signOut()
+    setIsLoading(true)
+    const result = await signOut()
+    
+    if (result.success) {
+      router.push('/login')
+      router.refresh()
+    } else {
+      setIsLoading(false)
+      setOpen(false)
+      // Handle error if needed
+      console.error('Sign out error:', result.error)
+    }
   }
 
   return (
@@ -39,17 +63,42 @@ export async function DashboardHeader() {
             </div>
           </div>
 
-          {/* Sign out button */}
-          <form action={handleSignOut}>
-            <Button
-              type="submit"
-              variant="outline"
-              className="gap-2 border border-neutral-200"
-            >
-              <LogOut className="size-4" />
-              Sign Out
-            </Button>
-          </form>
+          {/* Sign out button with confirmation dialog */}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-2 border border-neutral-200"
+              >
+                <LogOut className="size-4" />
+                Sign Out
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Sign Out</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to sign out? You&apos;ll need to sign in again to access your account.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleSignOut}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Signing out...' : 'Sign Out'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </header>

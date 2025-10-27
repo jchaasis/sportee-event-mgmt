@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       // Get the current user
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (user) {
+      if (user) {        
         // Check if user has an organization
         const { data: memberships } = await supabase
           .from('organization_members')
@@ -42,21 +42,19 @@ export async function GET(request: NextRequest) {
 
         // If no organization exists, create one
         if (!memberships || memberships.length === 0) {
-          const orgName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'My Organization'
-          
           // Create organization using the service role client
           const { createClient } = await import('@/lib/supabase/server-client')
           const adminSupabase = await createClient()
           
           const { data: orgData, error: orgError } = await adminSupabase
             .from('organizations')
-            .insert({ name: orgName })
+            .insert({})
             .select()
             .single()
 
-          if (!orgError && orgData) {
+          if (!orgError && orgData) {            
             // Create organization membership
-            await adminSupabase
+            const { error: memberError } = await adminSupabase
               .from('organization_members')
               .insert({
                 organization_id: orgData.id,
@@ -64,14 +62,28 @@ export async function GET(request: NextRequest) {
                 role: 'admin',
               })
 
+            if (memberError) {
+              console.error('Failed to create organization membership:', memberError)
+            } else {
+              console.log('Successfully created organization membership')
+            }
+
             // Create user profile
-            await adminSupabase
+            const { error: profileError } = await adminSupabase
               .from('profiles')
               .upsert({
                 id: user.id,
-                name: user.user_metadata?.full_name || user.email || '',
+                name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
                 email: user.email || '',
               })
+
+            if (profileError) {
+              console.error('Failed to create profile:', profileError)
+            } else {
+              console.log('Successfully created user profile')
+            }
+          } else if (orgError) {
+            console.error('Failed to create organization:', orgError)
           }
         }
       }

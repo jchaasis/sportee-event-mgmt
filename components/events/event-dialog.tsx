@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Event } from '@/lib/server-actions/event-actions'
@@ -41,10 +40,10 @@ interface EventDialogProps {
   event?: Event | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onEventSaved?: () => void
 }
 
-export function EventDialog({ event, open, onOpenChange }: EventDialogProps) {
-  const router = useRouter()
+export function EventDialog({ event, open, onOpenChange, onEventSaved }: EventDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [venues, setVenues] = useState<string[]>([])
 
@@ -119,12 +118,12 @@ export function EventDialog({ event, open, onOpenChange }: EventDialogProps) {
 
       if (result.success) {
         toast.success(event ? 'Event updated successfully' : 'Event created successfully')
+        onEventSaved?.()
         onOpenChange(false)
-        router.refresh()
       } else {
         toast.error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred')
     } finally {
       setIsSubmitting(false)

@@ -59,7 +59,6 @@ export const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-  organizationName: z.string().min(1, 'Organization name is required').max(100, 'Organization name must be 100 characters or less'),
 })
 
 export type SignupFormData = z.infer<typeof signupSchema>

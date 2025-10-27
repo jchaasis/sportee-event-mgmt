@@ -32,7 +32,6 @@ export function SignupForm() {
     formData.append('name', data.name)
     formData.append('email', data.email)
     formData.append('password', data.password)
-    formData.append('organizationName', data.organizationName)
 
     const result = await signUp(formData)
 
@@ -137,21 +136,6 @@ export function SignupForm() {
             />
             {errors.password && (
               <p className="text-sm text-red-600">{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* Organization Name */}
-          <div className="space-y-2">
-            <Label htmlFor="organizationName">Organization Name</Label>
-            <Input
-              id="organizationName"
-              type="text"
-              placeholder="Your organization"
-              {...register('organizationName')}
-              className="bg-[#f3f3f5] border-0 h-9"
-            />
-            {errors.organizationName && (
-              <p className="text-sm text-red-600">{errors.organizationName.message}</p>
             )}
           </div>
 

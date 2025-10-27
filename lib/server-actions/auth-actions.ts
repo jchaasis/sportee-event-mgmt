@@ -14,12 +14,11 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
       name: formData.get('name') as string,
-      organizationName: formData.get('organizationName') as string,
     }
 
     // Validate input
     const validated = signupSchema.parse(rawData)
-
+    
     const supabase = await createUserClient()
 
     // 1. Sign up the user
@@ -39,12 +38,10 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
     // 2. Get the service role client for elevated privileges
     const adminSupabase = await createClient()
 
-    // 3. Create or get the organization
+    // 3. Create the organization
     const { data: orgData, error: orgError } = await adminSupabase
       .from('organizations')
-      .insert({
-        name: validated.organizationName,
-      })
+      .insert({})
       .select()
       .single()
 

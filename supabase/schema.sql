@@ -12,7 +12,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Organizations table
 CREATE TABLE IF NOT EXISTS organizations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -117,18 +116,12 @@ CREATE POLICY "Users can create organizations"
 -- Users can view their own membership records
 CREATE POLICY "Users can view their memberships"
     ON organization_members FOR SELECT
-    USING (
-        user_id = auth.uid() OR
-        organization_id IN (
-            SELECT organization_id FROM organization_members
-            WHERE user_id = auth.uid()
-        )
-    );
+    USING (user_id = auth.uid());
 
 -- Users can insert new memberships (when signing up or invited)
 CREATE POLICY "Users can create memberships"
     ON organization_members FOR INSERT
-    WITH CHECK (user_id = auth.uid() OR true);
+    WITH CHECK (user_id = auth.uid());
 
 -- ============================================
 -- VENUES POLICIES
