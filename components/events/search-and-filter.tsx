@@ -35,6 +35,7 @@ export function SearchAndFilter({
     { value: 'cricket', label: 'Cricket' },
     { value: 'rugby', label: 'Rugby' },
     { value: 'golf', label: 'Golf' },
+    { value: 'other', label: 'Other' },
   ]
 
   return (

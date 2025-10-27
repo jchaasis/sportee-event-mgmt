@@ -14,6 +14,7 @@ export const SPORT_TYPES = [
   'cricket',
   'rugby',
   'golf',
+  'other',
 ] as const
 
 export type SportType = (typeof SPORT_TYPES)[number]
