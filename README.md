@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sportee - Sports Event Management
+
+A full-stack sports event management application built with Next.js, TypeScript, Supabase, and Tailwind CSS.
+
+## Features
+
+- 🔐 Authentication with Supabase (Email/Password + Google OAuth)
+- 📊 Dashboard to view all sports events
+- ➕ Create, edit, and delete events
+- 🏟️ Multiple venues per event
+- 🔍 Search and filter functionality
+- 📱 Responsive design
+
+## Tech Stack
+
+- **Framework:** Next.js 15+ (App Router)
+- **Language:** TypeScript
+- **Database:** Supabase (PostgreSQL)
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui
+- **Forms:** react-hook-form + zod
+- **Deployment:** Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ installed
+- A Supabase account
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
+
+You can find these values in your Supabase project settings under API.
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+├── (auth)/           # Authentication pages (login, signup)
+├── (dashboard)/      # Protected dashboard pages
+├── api/              # API routes
+└── layout.tsx        # Root layout
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+components/
+├── auth/             # Authentication components
+├── events/           # Event-related components
+└── ui/               # shadcn UI components
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+lib/
+├── supabase/         # Supabase client utilities
+├── server-actions/   # Server actions
+├── validations/      # Zod schemas
+└── utils.ts          # Utility functions
+```
 
-## Deploy on Vercel
+## Key Features Implementation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Server-Side Only:** All database interactions happen server-side using Server Actions
+- **Type Safety:** Full TypeScript support with Zod validation
+- **RLS Policies:** Row-level security enforced via Supabase
+- **Authentication:** Protected routes with middleware
+- **Organizations:** Multi-tenant support with organization membership
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Next Steps
+
+1. Set up your Supabase database schema
+2. Configure authentication providers (email + Google OAuth)
+3. Deploy to Vercel
+
+## License
+
+This project is part of a coding challenge.
