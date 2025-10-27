@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Event } from '@/lib/server-actions/event-actions'
 import { eventSchema, SPORT_TYPES, type EventFormData } from '@/lib/validations'
@@ -48,7 +48,7 @@ export function EventDialog({ event, open, onOpenChange, onEventSaved }: EventDi
   const [venues, setVenues] = useState<string[]>([])
 
   const form = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventSchema) as Resolver<EventFormData>,
     defaultValues: {
       name: '',
       sportType: 'soccer',
