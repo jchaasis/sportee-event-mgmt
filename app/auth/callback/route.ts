@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const cookieStore = await cookies()
+    const cookiesToSet: Array<{ name: string; value: string }> = []
+    
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,10 +19,11 @@ export async function GET(request: NextRequest) {
           getAll() {
             return cookieStore.getAll()
           },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
+          setAll(cookiesToStore) {
+            cookiesToStore.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options)
-            )
+              cookiesToSet.push({ name, value })
+            })
           },
         },
       }
@@ -88,8 +91,12 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Redirect to dashboard after successful authentication
-      return NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+      // Redirect to dashboard after successful authentication with cookies in the response
+      const redirectResponse = NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+      cookiesToSet.forEach(({ name, value }) => {
+        redirectResponse.cookies.set(name, value)
+      })
+      return redirectResponse
     }
   }
 
