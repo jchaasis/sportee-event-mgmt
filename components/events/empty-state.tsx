@@ -28,14 +28,13 @@ export function EmptyState({ onCreateEvent }: EmptyStateProps) {
       {/* Text */}
       <div className="space-y-2">
         <h3 className="text-base text-[#717182]">No events found</h3>
-        <p className="text-base text-[#717182]">Get started by creating your first event</p>
       </div>
 
       {/* Button */}
       <div className="mt-8">
         <Button onClick={onCreateEvent} className="gap-2 bg-purple-800 hover:bg-purple-900">
           <Plus className="size-4" />
-          Create Your First Event
+          Create Event
         </Button>
       </div>
     </div>
