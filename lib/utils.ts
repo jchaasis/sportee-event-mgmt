@@ -22,7 +22,7 @@ export function createSuccessResult<T>(data: T): ActionResult<T> {
 /**
  * Helper to create an error result
  */
-export function createErrorResult(error: string): ActionResult {
+export function createErrorResult<T = unknown>(error: string): ActionResult<T> {
   return { success: false, error }
 }
 

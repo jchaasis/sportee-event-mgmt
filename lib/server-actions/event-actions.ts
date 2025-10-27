@@ -31,6 +31,7 @@ export interface EventWithVenues {
   created_by: string
   created_at: string
   updated_at: string
+  organization_id?: string
   event_venues: Array<{
     venues: {
       id: string
@@ -39,6 +40,30 @@ export interface EventWithVenues {
       capacity?: number | null
     }
   }>
+}
+
+interface VenueData {
+  id: string
+  name: string
+  address?: string | null
+  capacity?: number | null
+}
+
+interface EventVenueResponse {
+  venues: VenueData
+}
+
+interface SupabaseEventResponse {
+  id: string
+  name: string
+  sport_type: string
+  event_date: string
+  description: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+  organization_id?: string
+  event_venues: Array<EventVenueResponse>
 }
 
 /**
@@ -106,7 +131,7 @@ export async function getEvents(search?: string, sportType?: string): Promise<Ac
     }
 
     // Transform the data to match the Event interface
-    const events: Event[] = (data || []).map((event: EventWithVenues) => ({
+    const events: Event[] = (data as unknown as SupabaseEventResponse[] || []).map((event) => ({
       id: event.id,
       name: event.name,
       sport_type: event.sport_type,
@@ -115,7 +140,12 @@ export async function getEvents(search?: string, sportType?: string): Promise<Ac
       created_by: event.created_by,
       created_at: event.created_at,
       updated_at: event.updated_at,
-      venues: event.event_venues?.map((ev: any) => ev.venues) || [],
+      venues: (event.event_venues || []).map((ev) => ({
+        id: ev.venues.id,
+        name: ev.venues.name,
+        address: ev.venues.address,
+        capacity: ev.venues.capacity,
+      })),
     }))
 
     return createSuccessResult(events)
@@ -184,7 +214,7 @@ export async function createEvent(formData: FormData): Promise<ActionResult> {
 
     for (const venueName of validated.venueIds) {
       // Check if venue exists, if not create it
-      let { data: existingVenue } = await adminSupabase
+      const { data: existingVenue } = await adminSupabase
         .from('venues')
         .select('id')
         .eq('name', venueName)
@@ -374,6 +404,7 @@ export async function getEventById(eventId: string): Promise<ActionResult<Event>
         created_by,
         created_at,
         updated_at,
+        organization_id,
         event_venues (
           venues (
             id,
@@ -390,6 +421,8 @@ export async function getEventById(eventId: string): Promise<ActionResult<Event>
       return createErrorResult(error?.message || 'Event not found')
     }
 
+    const eventData = data as unknown as SupabaseEventResponse
+
     // Check if user has access to this event's organization
     const { data: membership } = await supabase
       .from('organization_members')
@@ -397,20 +430,25 @@ export async function getEventById(eventId: string): Promise<ActionResult<Event>
       .eq('user_id', user.id)
       .single()
 
-    if (!membership || data.organization_id !== membership.organization_id) {
+    if (!membership || eventData.organization_id !== membership.organization_id) {
       return createErrorResult('Access denied')
     }
 
     const event: Event = {
-      id: data.id,
-      name: data.name,
-      sport_type: data.sport_type,
-      event_date: data.event_date,
-      description: data.description,
-      created_by: data.created_by,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      venues: data.event_venues?.map((ev: any) => ev.venues) || [],
+      id: eventData.id,
+      name: eventData.name,
+      sport_type: eventData.sport_type,
+      event_date: eventData.event_date,
+      description: eventData.description,
+      created_by: eventData.created_by,
+      created_at: eventData.created_at,
+      updated_at: eventData.updated_at,
+      venues: (eventData.event_venues || []).map((ev) => ({
+        id: ev.venues.id,
+        name: ev.venues.name,
+        address: ev.venues.address,
+        capacity: ev.venues.capacity,
+      })),
     }
 
     return createSuccessResult(event)
