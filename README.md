@@ -2,6 +2,9 @@
 
 A full-stack sports event management application built with Next.js, TypeScript, Supabase, and Tailwind CSS.
 
+## Assumptions
+Please see the `ASSUMPTIONS.md` file at the root of this project for assumptions made during development.
+
 ## Features
 
 - 🔐 Authentication with Supabase (Email/Password + Google OAuth)
